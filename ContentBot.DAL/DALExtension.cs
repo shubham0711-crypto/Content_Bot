@@ -1,6 +1,8 @@
 ﻿using ContentBot.DAL.Context;
+using ContentBot.DAL.Entities;
 using ContentBot.DAL.Repository;
 using ContentBot.DAL.Repository.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,10 +20,14 @@ namespace ContentBot.DAL
         {
             services.AddDbContext<ContentBotDbContext>(options =>
             {
-                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
+                options.UseSqlServer(configuration.GetConnectionString("SqlConnection"));
                 options.EnableSensitiveDataLogging();
                 options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
             });
+
+            services.AddIdentity<ApplicationUser, Roles>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddEntityFrameworkStores<ContentBotDbContext>();
+
 
             services.AddTransient<IAccountRepository, AccountRepository>();
         }

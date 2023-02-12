@@ -1,12 +1,23 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using ContentBot.BAL.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ContentBot.APi.Controllers
 {
-    public class AccountController : Controller
+    [Route("api/[controller]")]
+    [ApiController]
+    public class AccountController : ControllerBase
     {
-        public IActionResult Index()
+        private readonly IAccountService _accountService;
+
+        public AccountController(IAccountService accountService)
         {
-            return View();
+            _accountService = accountService;   
         }
+
+        //[HttpPost , Route("login")]
+        //public async Task<IActionResult> Login()
+        //{
+
+        //}
     }
 }
