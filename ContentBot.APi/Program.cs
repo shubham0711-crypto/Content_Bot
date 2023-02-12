@@ -13,7 +13,7 @@ builder.Services.AddSwaggerGen();
 IConfiguration configuration = builder.Configuration;
 
 
-builder.Services.AddBLResolver();
+builder.Services.AddBLResolver(configuration);
 builder.Services.AddDALResolver(configuration);
 
 var app = builder.Build();

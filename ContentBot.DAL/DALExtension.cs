@@ -25,8 +25,17 @@ namespace ContentBot.DAL
                 options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
             });
 
-            services.AddIdentity<ApplicationUser, Roles>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<ContentBotDbContext>();
+            services.AddIdentity<ApplicationUser, Roles>(options =>
+            {
+                options.Password.RequiredLength = 7;
+                options.Password.RequireDigit = true;
+                options.Password.RequireUppercase = true;
+                options.User.RequireUniqueEmail = true;
+                options.SignIn.RequireConfirmedEmail = true;
+
+            })
+                .AddEntityFrameworkStores<ContentBotDbContext>()
+                .AddDefaultTokenProviders();
 
 
             services.AddTransient<IAccountRepository, AccountRepository>();

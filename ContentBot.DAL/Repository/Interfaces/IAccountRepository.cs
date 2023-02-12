@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ContentBot.DAL.Entities;
+using Microsoft.AspNetCore.Identity;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,5 +10,12 @@ namespace ContentBot.DAL.Repository.Interfaces
 {
     public interface IAccountRepository
     {
+        Task<bool> CheckUserAlreadyExists(string phoneNumber, string email);
+
+        Task<IdentityResult> CreateApplicationUser(ApplicationUser applicationUser, string password);
+
+        Task<string> GenerateTokenEmailVerificationAsync(ApplicationUser user);
+
+
     }
 }

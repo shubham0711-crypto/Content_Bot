@@ -15,9 +15,6 @@ namespace ContentBot.DAL.Entities
         //public Guid CountryId { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime LastModifiedDate { get; set; }
-        public string ApiKey { get; set; }
-        public string SecreteKey { get; set; }
-        public byte[] ProfileImage { get; set; }
         public bool IsActive { get; set; }
         [NotMapped]
         public string Password { get; set; }
