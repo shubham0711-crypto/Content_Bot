@@ -20,7 +20,11 @@ namespace ContentBot.DAL.Repository.Interfaces
 
         Task<IdentityResult> ConfirmEmail(ApplicationUser user, string Token);
 
-        Task<SignInResult> Login(string Email, string Password);        
+        Task<SignInResult> Login(string Email, string Password);
+
+        Task<string> GeneratePasswordResetTokenAsync(ApplicationUser user);
+
+        Task<IdentityResult> ResetPasswordAsync(ApplicationUser nuser, string code, string RandomPassword);
 
     }
 }

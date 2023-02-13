@@ -13,6 +13,8 @@ namespace ContentBot.BAL
         public static IServiceCollection AddBLResolver(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+          
+
             services.AddTransient<IAccountService, AccountService>();
             services.AddTransient<ITokenService, TokenService>();
             services.AddMemoryCache();

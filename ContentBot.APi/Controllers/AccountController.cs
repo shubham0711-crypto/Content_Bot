@@ -1,6 +1,7 @@
 ﻿using ContentBot.BAL.Services;
 using ContentBot.BAL.Services.Interfaces;
 using ContentBot.Models.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Identity.UI.V4.Pages.Account.Internal;
 using Microsoft.AspNetCore.Mvc;
@@ -101,7 +102,61 @@ namespace ContentBot.APi.Controllers
             return Ok(result);
         }
 
+        [HttpPost, Route("forgotpassword")]
+        public async Task<IActionResult> ForgotPasswordAsync(ForgotPasswordRequestModel  forgotPasswordModel)
+        {
+            APIResponseEntity<ForgotPasswordResponseModel> response = new APIResponseEntity<ForgotPasswordResponseModel>();
+            try
+            {
+                response = await _accountService.ForgotPassword(forgotPasswordModel);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Code = HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+                return StatusCode(StatusCodes.Status500InternalServerError, response);
+            }
+        }
 
+        [HttpPost, Route("resetpassword")]
+        public async Task<IActionResult> ResetPasswordAsync(Models.Models.ResetPasswordModel resetPasswordModel)
+        {
+            APIResponseEntity<Models.Models.ResetPasswordModel> response = new APIResponseEntity<Models.Models.ResetPasswordModel>();
+            try
+            {
+                response = await _accountService.ResetPassword(resetPasswordModel);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Code = HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+                return StatusCode(StatusCodes.Status500InternalServerError, response);
+            }
+        }
+
+        [HttpGet, Route("getProfileDetail")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> GetProfileDetail(string Email)
+        {
+
+            APIResponseEntity<ApplicationUserModel> response = new APIResponseEntity<ApplicationUserModel>();
+            try
+            {
+                ApplicationUserModel applicationUserVM = await _accountService.GetApplicationUser(Email);
+                return Ok(applicationUserVM);
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Code = HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+                return StatusCode(StatusCodes.Status500InternalServerError, response);
+            }
+        }
 
     }
 }

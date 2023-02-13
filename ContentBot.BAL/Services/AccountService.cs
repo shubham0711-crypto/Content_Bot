@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using ContentBot.BAL.Services.Interfaces;
 using ContentBot.DAL.Entities;
+using ContentBot.DAL.Migrations;
 using ContentBot.DAL.Repository.Interfaces;
 using ContentBot.Models.Models;
 using Microsoft.AspNetCore.Identity;
@@ -21,6 +22,8 @@ namespace ContentBot.BAL.Services
         private readonly IEmailSender _emailSender;
         private readonly IMemoryCache _memoryCache;
         private readonly ITokenService _tokenService;
+        private static Random rand = new Random();
+
 
         public AccountService(IAccountRepository accountRepository, IMapper mapper,
             IEmailSender emailSender, IMemoryCache memoryCache, ITokenService tokenService)
@@ -127,31 +130,6 @@ namespace ContentBot.BAL.Services
             return false;
         }
 
-        private static string EmailBody(string name, string token)
-        {
-            string filePath = "./StaticFiles/RegSuccess.html";
-            StreamReader str = new StreamReader(filePath);
-            string mailText = str.ReadToEnd();
-            str.Close();
-            StringBuilder sb = new StringBuilder(mailText);
-            sb.Replace("@@FirstName@@", name);
-            sb.Replace("@@ButtonLink@@", token);
-            string body = sb.ToString();
-            return body;
-        }
-        
-        private static string EmailBody(string name, int Otp)
-        {
-            string filePath = "./StaticFiles/LogInSuccess.html";
-            StreamReader str = new StreamReader(filePath);
-            string mailText = str.ReadToEnd();
-            str.Close();
-            StringBuilder sb = new StringBuilder(mailText);
-            sb.Replace("@@FirstName@@", name);
-            sb.Replace("@@otp@@", Otp.ToString());
-            string body = sb.ToString();
-            return body;
-        }
 
         public async Task<APIResponseEntity<UserLoginResponseModel>> InitializeLogin(UserLoginRequestModel loginModel)
         {
@@ -240,21 +218,53 @@ namespace ContentBot.BAL.Services
             return response;
         }
 
-        public int GenerateOTP(int otpLength)
+        public async Task<APIResponseEntity<ForgotPasswordResponseModel>> ForgotPassword(ForgotPasswordRequestModel forgotPasswordRequestModel)
         {
-            string sOTP = string.Empty;
-            string sTempChars = string.Empty;
-            string[] saAllowedCharacters = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" };
-            Random rand = new Random();
-
-            for (int i = 0; i < otpLength; i++)
+            APIResponseEntity<ForgotPasswordResponseModel> response = new APIResponseEntity<ForgotPasswordResponseModel>();
+            ApplicationUser user = await _accountRepository.GetUserByEmail(forgotPasswordRequestModel.Email);
+            if (user != null)
             {
-                int p = rand.Next(0, saAllowedCharacters.Length);
-                sTempChars = saAllowedCharacters[rand.Next(0, saAllowedCharacters.Length)];
-                sOTP += sTempChars;
+                string code = await _accountRepository.GeneratePasswordResetTokenAsync(user);
+                string NewPassword = RandomPassword();
+                await _accountRepository.ResetPasswordAsync(user, code, NewPassword);
+                await _emailSender.SendEmailAsync(forgotPasswordRequestModel.Email, "New password", $"Your new password is <b> " + NewPassword + "</b>");
+                response.Code = HttpStatusCode.OK;
+                response.Message = "New Password";
+                response.Data = new ForgotPasswordResponseModel { Email = forgotPasswordRequestModel.Email };
             }
-            return Convert.ToInt32(sOTP);
+            else
+            {
+                response.Code = HttpStatusCode.OK;
+                response.Message = "User Not Found";
+                response.IsSuccess = false;
+            }
+            return response;
         }
+
+        public async Task<APIResponseEntity<ResetPasswordModel>> ResetPassword(ResetPasswordModel resetPasswordModel)
+        {
+            APIResponseEntity<ResetPasswordModel> response = new APIResponseEntity<ResetPasswordModel>();
+            ApplicationUser applicationUser = await _accountRepository.GetUserByEmail(resetPasswordModel.Email);
+            if (applicationUser != null)
+            {
+                string code = await _accountRepository.GeneratePasswordResetTokenAsync(applicationUser);
+                var result = await _accountRepository.ResetPasswordAsync(applicationUser, code, resetPasswordModel.Password);
+                if (!result.Succeeded) return null;
+                await _emailSender.SendEmailAsync(resetPasswordModel.Email, "Reset password", $"Your password is successfully reset.");
+
+                response.Code = HttpStatusCode.OK;
+                response.Message = "Reset password";
+                response.Data = new ResetPasswordModel { Email = resetPasswordModel.Email };
+            }
+            else
+            {
+                response.Code = HttpStatusCode.OK;
+                response.Message = "User Not Found";
+                response.IsSuccess = false;
+            }
+            return response;
+        }
+    
 
         public APIResponseEntity VerifyLoginOtp(VerifyLoginOtpRequestModel verifyLoginOtpRequestModel)
         {
@@ -276,6 +286,99 @@ namespace ContentBot.BAL.Services
             }
 
             return response;
+        }
+
+
+        private static string EmailBody(string name, string token)
+        {
+            string filePath = "./StaticFiles/RegSuccess.html";
+            StreamReader str = new StreamReader(filePath);
+            string mailText = str.ReadToEnd();
+            str.Close();
+            StringBuilder sb = new StringBuilder(mailText);
+            sb.Replace("@@FirstName@@", name);
+            sb.Replace("@@ButtonLink@@", token);
+            string body = sb.ToString();
+            return body;
+        }
+
+        private static string EmailBody(string name, int Otp)
+        {
+            string filePath = "./StaticFiles/LogInSuccess.html";
+            StreamReader str = new StreamReader(filePath);
+            string mailText = str.ReadToEnd();
+            str.Close();
+            StringBuilder sb = new StringBuilder(mailText);
+            sb.Replace("@@FirstName@@", name);
+            sb.Replace("@@otp@@", Otp.ToString());
+            string body = sb.ToString();
+            return body;
+        }
+
+        public int GenerateOTP(int otpLength)
+        {
+            string sOTP = string.Empty;
+            string sTempChars = string.Empty;
+            string[] saAllowedCharacters = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" };
+            Random rand = new Random();
+
+            for (int i = 0; i < otpLength; i++)
+            {
+                int p = rand.Next(0, saAllowedCharacters.Length);
+                sTempChars = saAllowedCharacters[rand.Next(0, saAllowedCharacters.Length)];
+                sOTP += sTempChars;
+            }
+            return Convert.ToInt32(sOTP);
+        }
+
+       
+
+        public static string RandomPassword(int length = 8)
+        {
+            string[] categories = {
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+                "abcdefghijklmnopqrstuvwxyz",
+                "!-_*+&$",
+                "0123456789"
+            };
+
+            List<char> chars = new List<char>(length);
+
+            // add one char from each category
+            foreach (string cat in categories)
+            {
+                chars.Add(cat[rand.Next(cat.Length)]);
+            }
+
+            // add random chars from any category until we hit the length
+            string all = string.Concat(categories);
+            while (chars.Count < length)
+            {
+                chars.Add(all[rand.Next(all.Length)]);
+            }
+
+            // shuffle and return our password
+            var shuffled = chars.OrderBy(c => rand.NextDouble()).ToArray();
+            return new string(shuffled);
+        }
+
+        public async Task<ApplicationUserModel> GetApplicationUser(string Email)
+        {
+            ApplicationUser applicationUser = await _accountRepository.GetUserByEmail(Email);
+            ApplicationUserModel applicationUserVM = new ApplicationUserModel();
+            if (applicationUser != null)
+            {
+                applicationUserVM = new ApplicationUserModel()
+                {
+                    Id = applicationUser.Id,
+                    FirstName = applicationUser.FirstName,
+                    LastName = applicationUser.LastName,
+                    Email = applicationUser.Email,
+                };
+            }
+
+            return applicationUserVM;
+
         }
     }
 }
