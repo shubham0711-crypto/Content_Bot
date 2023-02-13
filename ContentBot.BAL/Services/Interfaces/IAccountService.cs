@@ -18,5 +18,11 @@ namespace ContentBot.BAL.Services.Interfaces
         Task<APIResponseEntity<UserLoginResponseModel>> InitializeLogin(UserLoginRequestModel loginModel);
 
         APIResponseEntity VerifyLoginOtp(VerifyLoginOtpRequestModel verifyLoginOtpRequestModel);
+
+        Task<APIResponseEntity<ForgotPasswordResponseModel>> ForgotPassword(ForgotPasswordRequestModel forgotPasswordRequestModel);
+
+        Task<APIResponseEntity<ResetPasswordModel>> ResetPassword(ResetPasswordModel resetPasswordModel);
+
+        Task<ApplicationUserModel> GetApplicationUser(string Email);
     }
 }

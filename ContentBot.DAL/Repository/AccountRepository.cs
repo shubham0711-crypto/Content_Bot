@@ -42,6 +42,12 @@ namespace ContentBot.DAL.Repository
             return await _userManager.CreateAsync(applicationUser, password);
         }
 
+        public async Task<string> GeneratePasswordResetTokenAsync(ApplicationUser user)
+        {
+            return await _userManager.GeneratePasswordResetTokenAsync(user);
+
+        }
+
         public async Task<string> GenerateTokenEmailVerificationAsync(ApplicationUser user)
         {
             return await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -56,6 +62,12 @@ namespace ContentBot.DAL.Repository
         public async Task<SignInResult> Login(string Email, string Password)
         {
             return await _signInManager.PasswordSignInAsync(Email, Password, isPersistent: false, lockoutOnFailure: true);
+
+        }
+
+        public async Task<IdentityResult> ResetPasswordAsync(ApplicationUser nuser, string code, string RandomPassword)
+        {
+            return await _userManager.ResetPasswordAsync(nuser, code, RandomPassword);
 
         }
     }
