@@ -14,5 +14,7 @@ namespace ContentBot.BAL.Services.Interfaces
         Task SendEmail(EmailModel emailModel);
 
         Task<bool> ConfirmEmail(string Token, string Email);
+
+        Task<APIResponseEntity<UserLoginResponseModel>> InitializeLogin(UserLoginRequestModel loginModel);
     }
 }

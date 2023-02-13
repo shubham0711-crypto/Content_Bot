@@ -14,4 +14,12 @@ namespace ContentBot.Models.Models
         public T Data { get; set; }
         public bool IsSuccess { get; set; } = true;
     }
+
+    public class APIResponseEntity
+    {
+        public HttpStatusCode Code { get; set; }
+        public string Message { get; set; }
+        public string data { get; set; }
+        public bool IsSuccess { get; set; } = true;
+    }
 }

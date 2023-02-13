@@ -14,8 +14,8 @@ namespace ContentBot.BAL
         {
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddTransient<IAccountService, AccountService>();
-
-
+            services.AddTransient<ITokenService, TokenService>();
+            services.AddMemoryCache();
 
             return services;
         }
