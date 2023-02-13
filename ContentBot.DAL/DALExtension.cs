@@ -2,7 +2,9 @@
 using ContentBot.DAL.Entities;
 using ContentBot.DAL.Repository;
 using ContentBot.DAL.Repository.Interfaces;
+using ContentBot.Models.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,8 +39,12 @@ namespace ContentBot.DAL
                 .AddEntityFrameworkStores<ContentBotDbContext>()
                 .AddDefaultTokenProviders();
 
+            services.AddTransient<IEmailSender, EmailSender>();
+
 
             services.AddTransient<IAccountRepository, AccountRepository>();
+            services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
+
         }
 
     }

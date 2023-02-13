@@ -29,6 +29,11 @@ namespace ContentBot.DAL.Repository
             }
         }
 
+        public async Task<IdentityResult> ConfirmEmail(ApplicationUser user, string Token)
+        {
+           return await _userManager.ConfirmEmailAsync(user, Token);
+        }
+
         public async Task<IdentityResult> CreateApplicationUser(ApplicationUser applicationUser, string password)
         {
             return await _userManager.CreateAsync(applicationUser, password);
@@ -38,6 +43,11 @@ namespace ContentBot.DAL.Repository
         {
             return await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
+        }
+
+        public async Task<ApplicationUser> GetUserByEmail(string Email)
+        {
+            return await _userManager.FindByEmailAsync(Email);
         }
     }
 }

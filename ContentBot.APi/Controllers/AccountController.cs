@@ -30,10 +30,23 @@ namespace ContentBot.APi.Controllers
             {
                 result = await _accountService.RegisterUser(requestModel);
 
+                if (result.IsSuccess)
+                {
+                    var confirmationLink = Url.Action(nameof(ConfirmEmail), "Account", new { result.Data.Token, Email = result.Data.Email }, Request.Scheme);
+
+                    EmailModel email = new EmailModel
+                    {
+                        UserName = requestModel.UserName,
+                        Token = confirmationLink,
+                        Email = requestModel.Email
+                    };
+                    await _accountService.SendEmail(email);
+                }
+            
                 return Ok(result);
             }
 
-            catch(Exception ex) 
+            catch (Exception ex)
             {
                 result.IsSuccess = false;
                 result.Code = HttpStatusCode.InternalServerError;
@@ -42,10 +55,21 @@ namespace ContentBot.APi.Controllers
             }
         }
 
-        [HttpPost, Route("SendEmail")]
-        public async Task<IActionResult> SendEmail(EmailModel confirmEmailModel)
+        //[HttpPost, Route("SendEmail")]
+        //public async Task<IActionResult> SendEmail(EmailModel confirmEmailModel)
+        //{
+        //    await _accountService.SendEmail(confirmEmailModel);
+        //    //var confirmationLink = Url.Action(nameof(ConfirmEmail), "Account", new { token, email = user.Email }, Request.Scheme);
+
+        //    return Ok();
+        //}
+
+        [HttpGet, Route("ConfirmEmail")]
+        public async Task<IActionResult> ConfirmEmail(string Token, string Email)
         {
-            var result = await _accountService.SendEmail(confirmEmailModel);
+            var result = await _accountService.ConfirmEmail(Token, Email);
+            return Ok(result);
         }
+
     }
 }

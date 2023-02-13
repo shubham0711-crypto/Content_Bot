@@ -12,5 +12,7 @@ namespace ContentBot.BAL.Services.Interfaces
         Task<APIResponseEntity<RegistrationResponse>> RegisterUser(RegistrationRequestModel registrationRequestModel);
 
         Task SendEmail(EmailModel emailModel);
+
+        Task<bool> ConfirmEmail(string Token, string Email);
     }
 }

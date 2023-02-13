@@ -5,6 +5,7 @@ using ContentBot.DAL.Repository.Interfaces;
 using ContentBot.Models.Models;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using System.Net;
+using System.Net.Mail;
 using System.Text;
 
 namespace ContentBot.BAL.Services
@@ -35,8 +36,18 @@ namespace ContentBot.BAL.Services
                     return AlreadyExists;
                 }
 
-
-                ApplicationUser user = _mapper.Map<ApplicationUser>(registrationRequestModel);
+                ApplicationUser user = new ApplicationUser
+                {
+                    FirstName = registrationRequestModel.FirstName,
+                    LastName = registrationRequestModel.LastName,
+                    Email = registrationRequestModel.Email,
+                    Password = registrationRequestModel.Password,
+                    PhoneNumber = registrationRequestModel.PhoneNumber,
+                    ConfirmPassword = registrationRequestModel.ConfirmPassword,
+                    EmailConfirmed = false,
+                    UserName = registrationRequestModel.UserName,
+                    IsActive = false
+                };
                 var CreatedUser = await _accountRepository.CreateApplicationUser(user, user.Password);
 
                 if (CreatedUser.Succeeded)
@@ -78,9 +89,7 @@ namespace ContentBot.BAL.Services
                 Exception.IsSuccess = false;
                 Exception.Code = HttpStatusCode.NotFound;
                 Exception.Message = ex.Message;
-
                 return Exception;
-
             }
 
         }
@@ -88,9 +97,39 @@ namespace ContentBot.BAL.Services
         public async Task SendEmail(EmailModel emailModel)
         {
             var Body = EmailBody(emailModel.UserName, emailModel.Token);
-            await _emailSender.SendEmailAsync(emailModel.Email,"Email Verification" , Body);
+            //await _emailSender.SendEmailAsync(emailModel.Email,"Email Verification" , Body);
+
+            using(MailMessage mail = new MailMessage())
+            {
+                mail.From = new MailAddress("shubhamchoksi15@gmail.com");
+                mail.To.Add(emailModel.Email);
+                mail.Subject = "EmailConfirmation";
+                mail.Body = Body;
+                mail.IsBodyHtml= true;
+                using(SmtpClient smtp = new SmtpClient("smtp.gmail.com", 587))
+                {
+                    smtp.Credentials = new NetworkCredential("shubhamchoksi15@gmail.com", "zkjqgdegajwpcikw");
+                    smtp.EnableSsl = true;
+                    smtp.Send(mail);
+                }
+            }
         }
 
+        public async Task<bool> ConfirmEmail(string Token, string Email)
+        {
+            var user = await _accountRepository.GetUserByEmail(Email);
+            if(user == null) {
+                return false;         
+            }
+
+            var confirmation = await _accountRepository.ConfirmEmail(user, Token);  
+            if(confirmation.Succeeded == true)
+            {
+                return true;
+            }
+
+            return false;
+        }
 
         private static string EmailBody(string name, string token)
         {
@@ -104,5 +143,7 @@ namespace ContentBot.BAL.Services
             string body = sb.ToString();
             return body;
         }
+
+      
     }
 }

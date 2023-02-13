@@ -16,6 +16,10 @@ namespace ContentBot.DAL.Repository.Interfaces
 
         Task<string> GenerateTokenEmailVerificationAsync(ApplicationUser user);
 
+        Task<ApplicationUser> GetUserByEmail(string Email);
+
+        Task<IdentityResult> ConfirmEmail(ApplicationUser user, string Token);
+
 
     }
 }
