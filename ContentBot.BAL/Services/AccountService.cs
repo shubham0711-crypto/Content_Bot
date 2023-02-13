@@ -29,6 +29,7 @@ namespace ContentBot.BAL.Services
             _emailSender = emailSender;
             _memoryCache = memoryCache;
             _tokenService = tokenService;
+            _mapper = mapper;
         }
 
         public async Task<APIResponseEntity<RegistrationResponse>> RegisterUser(RegistrationRequestModel registrationRequestModel)
@@ -253,6 +254,28 @@ namespace ContentBot.BAL.Services
                 sOTP += sTempChars;
             }
             return Convert.ToInt32(sOTP);
+        }
+
+        public APIResponseEntity VerifyLoginOtp(VerifyLoginOtpRequestModel verifyLoginOtpRequestModel)
+        {
+            APIResponseEntity response = new APIResponseEntity();
+
+            var EmailOtp = _memoryCache.Get(verifyLoginOtpRequestModel.Email);
+
+            if(verifyLoginOtpRequestModel.EmailOTP == EmailOtp.ToString())
+            {
+                response.IsSuccess = true;
+                response.Code = HttpStatusCode.OK;
+                response.Message = "Verify OTP";
+            }
+            else
+            {
+                response.IsSuccess = false;
+                response.Code = HttpStatusCode.InternalServerError;
+                response.Message = "OTP mismatched";
+            }
+
+            return response;
         }
     }
 }

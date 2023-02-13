@@ -1,4 +1,5 @@
-﻿using ContentBot.BAL.Services.Interfaces;
+﻿using ContentBot.BAL.Services;
+using ContentBot.BAL.Services.Interfaces;
 using ContentBot.Models.Models;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Identity.UI.V4.Pages.Account.Internal;
@@ -31,12 +32,29 @@ namespace ContentBot.APi.Controllers
                 if (response.Code == HttpStatusCode.OK) return Ok(response);
                 else return NotFound(response);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 response.IsSuccess = false;
                 response.Code = HttpStatusCode.InternalServerError;
                 response.Message = ex.Message;
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
+            }
+        }
+
+        [HttpPost, Route("verifyLoginOtp")]
+        public IActionResult VerifyLoginOtp(VerifyLoginOtpRequestModel verifyLoginOtpRequestModel)
+        {
+            APIResponseEntity response = new APIResponseEntity();
+            try
+            {
+                response = _accountService.VerifyLoginOtp(verifyLoginOtpRequestModel);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Message = ex.Message;
+                return NotFound();
             }
         }
 
