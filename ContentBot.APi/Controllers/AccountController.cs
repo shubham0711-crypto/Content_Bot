@@ -55,14 +55,7 @@ namespace ContentBot.APi.Controllers
             }
         }
 
-        //[HttpPost, Route("SendEmail")]
-        //public async Task<IActionResult> SendEmail(EmailModel confirmEmailModel)
-        //{
-        //    await _accountService.SendEmail(confirmEmailModel);
-        //    //var confirmationLink = Url.Action(nameof(ConfirmEmail), "Account", new { token, email = user.Email }, Request.Scheme);
-
-        //    return Ok();
-        //}
+   
 
         [HttpGet, Route("ConfirmEmail")]
         public async Task<IActionResult> ConfirmEmail(string Token, string Email)
