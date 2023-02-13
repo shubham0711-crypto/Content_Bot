@@ -20,6 +20,25 @@ namespace ContentBot.APi.Controllers
         }
 
 
+        [HttpPost, Route("login")]
+        public async Task<IActionResult> Login(UserLoginRequestModel loginModel)
+        {
+            APIResponseEntity<UserLoginResponseModel> response = new APIResponseEntity<UserLoginResponseModel>();
+
+            try
+            {
+                response = await _accountService.InitializeLogin(loginModel);
+                if (response.Code == HttpStatusCode.OK) return Ok(response);
+                else return NotFound(response);
+            }
+            catch(Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Code = HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+                return StatusCode(StatusCodes.Status500InternalServerError, response);
+            }
+        }
 
         [HttpPost, Route("Register")]
         public async Task<IActionResult> Register(RegistrationRequestModel requestModel)
@@ -42,7 +61,7 @@ namespace ContentBot.APi.Controllers
                     };
                     await _accountService.SendEmail(email);
                 }
-            
+
                 return Ok(result);
             }
 
@@ -55,7 +74,7 @@ namespace ContentBot.APi.Controllers
             }
         }
 
-   
+
 
         [HttpGet, Route("ConfirmEmail")]
         public async Task<IActionResult> ConfirmEmail(string Token, string Email)
@@ -63,6 +82,8 @@ namespace ContentBot.APi.Controllers
             var result = await _accountService.ConfirmEmail(Token, Email);
             return Ok(result);
         }
+
+
 
     }
 }

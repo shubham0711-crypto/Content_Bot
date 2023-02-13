@@ -8,12 +8,15 @@ namespace ContentBot.DAL.Repository
     public class AccountRepository : IAccountRepository
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager; 
 
-        public AccountRepository(UserManager<ApplicationUser> userManager)
+        public AccountRepository(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
         {
             _userManager = userManager;
+            _signInManager = signInManager;
         }
 
+      
         public async Task<bool> CheckUserAlreadyExists(string phoneNumber, string email)
         {
             var result = await _userManager.Users.Where(x => x.PhoneNumber == phoneNumber || x.Email == email).ToListAsync();
@@ -48,6 +51,12 @@ namespace ContentBot.DAL.Repository
         public async Task<ApplicationUser> GetUserByEmail(string Email)
         {
             return await _userManager.FindByEmailAsync(Email);
+        }
+
+        public async Task<SignInResult> Login(string Email, string Password)
+        {
+            return await _signInManager.PasswordSignInAsync(Email, Password, isPersistent: false, lockoutOnFailure: true);
+
         }
     }
 }
