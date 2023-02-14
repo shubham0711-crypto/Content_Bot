@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OpenAI.GPT3.Extensions;
+using OpenAI.GPT3.Interfaces;
+using OpenAI.GPT3.Managers;
 
 namespace ContentBot.BAL
 {

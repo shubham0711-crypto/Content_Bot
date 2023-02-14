@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ContentBot.Models.Models;
+using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +10,11 @@ namespace ContentBot.BAL.Services.Interfaces
 {
     public interface IImageGenerationService
     {
-        Task GenerateImageFromText(string Text);
+        Task<APIResponseEntity<ImageResponseModel>> GenerateImageFromText(string Text);
+
+        Task<APIResponseEntity<ImageResponseModel>> CreateImageEdit(ImageEditModel editModel);
+
+
 
     }
 }
