@@ -86,6 +86,41 @@ namespace ContentBot.BAL.Services
 
         }
 
+        public async Task<APIResponseEntity<ImageResponseModel>> CreateImageVariations(ImageEditModel editModel)
+        {
+            APIResponseEntity<ImageResponseModel> response = new();
+            ImageResponseModel imageModel = new();
+
+            var ms = new MemoryStream();
+            await editModel.Image.CopyToAsync(ms);
+            var ImageArray = ms.ToArray();
+
+            var ImageResult = _openAiService.Image.CreateImageVariation(new ImageVariationCreateRequest
+            {
+                Image = ImageArray,
+                ImageName = editModel.Image.Name,
+                N = 2,
+                Size = StaticValues.ImageStatics.Size.Size1024,
+                ResponseFormat = StaticValues.ImageStatics.ResponseFormat.Url,
+            });
+
+            if (ImageResult.IsCompletedSuccessfully)
+            {
+                imageModel.ImageUrls = ImageResult.Result.Results.Select(x => x.Url).ToList();
+                imageModel.ImageCount = ImageResult.Result.Results.Count();
+                response.IsSuccess = true;
+                response.Data = imageModel;
+                return response;
+            }
+            else
+            {
+                response.IsSuccess = false;
+                response.Message = ImageResult.Result.Error.Message.ToString();
+                return response;
+            }
+
+        }
+
         //public async Task<string> SaveImage(IFormFile Image)
         //{
         //    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(Image.FileName);

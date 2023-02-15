@@ -14,6 +14,8 @@ namespace ContentBot.BAL.Services.Interfaces
 
         Task<APIResponseEntity<ImageResponseModel>> CreateImageEdit(ImageEditModel editModel);
 
+        Task<APIResponseEntity<ImageResponseModel>> CreateImageVariations(ImageEditModel editModel);
+
 
 
     }
